@@ -1,5 +1,6 @@
 package com.creditcard.processor.serviceimpl;
 
+import com.creditcard.processor.domain.CardResponse;
 import com.creditcard.processor.domain.CreateCardRequest;
 import com.creditcard.processor.domain.CreateCardResponse;
 import com.creditcard.processor.entity.CreditCardAccount;
@@ -12,6 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CreditCardOperationsImpl implements CreditCardOperations {
@@ -44,5 +49,17 @@ public class CreditCardOperationsImpl implements CreditCardOperations {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse("Card Number is already in use."));
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(new CreateCardResponse("Successfully created."));
+    }
+
+    @Override
+    public ResponseEntity<List<CardResponse>> getCreditCard() {
+        Iterable<CreditCardAccount> items = repo.findAll();
+
+        List<CardResponse> cards = new ArrayList<>();
+        if(Optional.ofNullable(items).isPresent()){
+            items.forEach(item ->
+                   cards.add(new CardResponse(item.getCardNumber(), item.getBalance())));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(cards);
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(DataProviderRunner.class)
@@ -61,6 +62,13 @@ public class CreditCardAccountControllerTest {
     public void test_creditCard_Create(CreateCardRequest request, HttpStatus expectedStatus){
         ResponseEntity responseEntity = controller.createAccount(request);
         assertEquals(expectedStatus, responseEntity.getStatusCode());
+        verify(operations).saveCreditCard(request);
+    }
+
+    @Test
+    public void test_getCreditCards(){
+        ResponseEntity responseEntity = controller.getAllCreditCard();
+        verify(operations).getCreditCard();
     }
 
 }

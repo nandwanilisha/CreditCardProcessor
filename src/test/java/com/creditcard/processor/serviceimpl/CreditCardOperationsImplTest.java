@@ -1,6 +1,7 @@
 package com.creditcard.processor.serviceimpl;
 
 import com.creditcard.processor.domain.CreateCardRequest;
+import com.creditcard.processor.entity.CreditCardAccount;
 import com.creditcard.processor.repo.CreditCardAccountRepo;
 import com.creditcard.processor.service.CreditCardValidations;
 import com.tngtech.java.junit.dataprovider.DataProvider;
@@ -15,7 +16,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
+
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(DataProviderRunner.class)
@@ -72,6 +76,24 @@ public class CreditCardOperationsImplTest {
     public void test_saveCreditCard(CreateCardRequest request, HttpStatus expectedStatus){
         ResponseEntity responseEntity = operations.saveCreditCard(request);
         assertEquals(expectedStatus, responseEntity.getStatusCode());
+    }
+
+    @Test
+    public void test_getCreditCard_whenNoData(){
+        when(repo.findAll()).thenReturn(null);
+        ResponseEntity responseEntity = operations.getCreditCard();
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @Test
+    public void test_getCreditCard_whenDataIsPresent(){
+        CreditCardAccount account = new CreditCardAccount();
+        account.setCardNumber("4012888888881881");
+        account.setBalance(100L);
+        when(repo.findAll()).thenReturn(new ArrayList<>());
+        ResponseEntity responseEntity = operations.getCreditCard();
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        verify(repo).findAll();
     }
 
 }
