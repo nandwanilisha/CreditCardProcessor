@@ -1,0 +1,5 @@
+create table if not exists CREDIT_CARD_ACCOUNT(
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    CARD_NUMBER VARCHAR(19) unique,
+    BALANCE INT
+);
