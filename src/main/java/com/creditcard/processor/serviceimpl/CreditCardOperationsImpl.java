@@ -7,6 +7,7 @@ import com.creditcard.processor.entity.CreditCardAccount;
 import com.creditcard.processor.repo.CreditCardAccountRepo;
 import com.creditcard.processor.service.CreditCardOperations;
 import com.creditcard.processor.service.CreditCardValidations;
+import com.creditcard.processor.service.EncryptionDecryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,9 @@ public class CreditCardOperationsImpl implements CreditCardOperations {
     @Autowired
     CreditCardAccountRepo repo;
 
+    @Autowired
+    EncryptionDecryptionService encryptionDecryptionService;
+
     @Override
     public ResponseEntity<CreateCardResponse> saveCreditCard(CreateCardRequest cardDetails) {
         if(!StringUtils.hasLength(cardDetails.getCardNumber()) && !validations.isLengthValid(cardDetails.getCardNumber())){
@@ -40,9 +44,14 @@ public class CreditCardOperationsImpl implements CreditCardOperations {
         }
 
         CreditCardAccount account = new CreditCardAccount();
-        account.setCardNumber(cardDetails.getCardNumber());
+        account.setCardNumber(encryptionDecryptionService.encrypt(cardDetails.getCardNumber()));
         account.setBalance(cardDetails.getBalance() != null && cardDetails.getBalance() >= 0
                 ? cardDetails.getBalance() : 0);
+
+        if(!StringUtils.hasLength(account.getCardNumber())){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CreateCardResponse("Encryption Failed."));
+        }
+
         try{
             repo.save(account);
         }catch (DataIntegrityViolationException ex){
@@ -58,7 +67,12 @@ public class CreditCardOperationsImpl implements CreditCardOperations {
         List<CardResponse> cards = new ArrayList<>();
         if(Optional.ofNullable(items).isPresent()){
             items.forEach(item ->
-                   cards.add(new CardResponse(item.getCardNumber(), item.getBalance())));
+            {
+                String cardNumber = encryptionDecryptionService.decrypt(item.getCardNumber());
+                if (StringUtils.hasLength(cardNumber)) {
+                    cards.add(new CardResponse(cardNumber, item.getBalance()));
+                }
+            });
         }
         return ResponseEntity.status(HttpStatus.OK).body(cards);
     }
