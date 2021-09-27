@@ -25,7 +25,7 @@ public class CreditCardAccountController {
         return creditCardOperations.getCreditCard();
     }
 
-    @GetMapping(value = "accounts/credit-card/encrypt-helper")
+    @GetMapping(value = "accounts/credit-card/encrypt-helper", produces = "application/json", consumes = "application/json")
     public ResponseEntity<EncryptResponse> getEncryptedCreditCard(@RequestBody EncryptRequest request){
         return creditCardOperations.getEncryptedCardNumber(request);
     }
