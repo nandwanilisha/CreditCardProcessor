@@ -9,7 +9,7 @@ This is a Spring Boot Application developed in JAVA, is used to add credt-card a
                "cardNumber": "XXXXXXXXXXXXXXXX",  
                "balance" : Z  
             }    
-            where X is a number from 0-9, Z is the amount for initial balance.  
+            where X is an encrypted card number, Z is the amount for initial balance.  
             Balance is optional as intial balance can be 0 at the begining.
             
    Produces: JSON  
@@ -38,3 +38,15 @@ This is a Spring Boot Application developed in JAVA, is used to add credt-card a
                 }  
             ]  
   where X is a number from 0-9, Z is the amount for initial balance.
+  
+3. Helper API: accounts/credit-card/encrypt-helper Added just to get the encrypted credit card to be used for above API's  
+   This is a Get API  
+   Consumes: Json  
+            {  
+              "cardNumber": "XXXXXXXXXXX" 
+            }  
+   Produces: Json  
+            {  
+              "encryptedCardNumber": "YYYYYYYYY"  
+            }  
+   where  X is 0-9, Y is any charaters
