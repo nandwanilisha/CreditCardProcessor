@@ -8,6 +8,6 @@ import java.io.Serializable;
 @Setter
 @Getter
 public class CreateCardRequest implements Serializable {
-    private String cardNumber;
+    private String encryptedCardNumber;
     private Long balance;
 }

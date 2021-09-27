@@ -1,8 +1,6 @@
 package com.creditcard.processor.serviceimpl;
 
-import com.creditcard.processor.domain.CardResponse;
-import com.creditcard.processor.domain.CreateCardRequest;
-import com.creditcard.processor.domain.CreateCardResponse;
+import com.creditcard.processor.domain.*;
 import com.creditcard.processor.entity.CreditCardAccount;
 import com.creditcard.processor.repo.CreditCardAccountRepo;
 import com.creditcard.processor.service.CreditCardOperations;
@@ -33,18 +31,19 @@ public class CreditCardOperationsImpl implements CreditCardOperations {
 
     @Override
     public ResponseEntity<CreateCardResponse> saveCreditCard(CreateCardRequest cardDetails) {
-        if(!StringUtils.hasLength(cardDetails.getCardNumber()) && !validations.isLengthValid(cardDetails.getCardNumber())){
+        String decryptedCard = encryptionDecryptionService.decrypt(cardDetails.getEncryptedCardNumber());
+        if(!StringUtils.hasLength(decryptedCard) && !validations.isLengthValid(decryptedCard)){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse("Length of the card number is not valid"));
         }
-        if(!validations.areCharactersVaild(cardDetails.getCardNumber())) {
+        if(!validations.areCharactersVaild(decryptedCard)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse("Card Number must contain numeric numbers only"));
         }
-        if(!validations.isLuhnVaild(cardDetails.getCardNumber())){
+        if(!validations.isLuhnVaild(decryptedCard)){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse("Card Number is not valid."));
         }
 
         CreditCardAccount account = new CreditCardAccount();
-        account.setCardNumber(encryptionDecryptionService.encrypt(cardDetails.getCardNumber()));
+        account.setCardNumber(encryptionDecryptionService.encrypt(decryptedCard));
         account.setBalance(cardDetails.getBalance() != null && cardDetails.getBalance() >= 0
                 ? cardDetails.getBalance() : 0);
 
@@ -75,5 +74,14 @@ public class CreditCardOperationsImpl implements CreditCardOperations {
             });
         }
         return ResponseEntity.status(HttpStatus.OK).body(cards);
+    }
+
+    @Override
+    public ResponseEntity<EncryptResponse> getEncryptedCardNumber(EncryptRequest request) {
+        String encryptedCardNumber = encryptionDecryptionService.encrypt(request.getCardNumber());
+        if(StringUtils.hasLength(encryptedCardNumber)){
+            return ResponseEntity.status(HttpStatus.OK).body(new EncryptResponse(encryptedCardNumber));
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new EncryptResponse());
     }
 }

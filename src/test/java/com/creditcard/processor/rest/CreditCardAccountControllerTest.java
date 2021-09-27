@@ -44,10 +44,10 @@ public class CreditCardAccountControllerTest {
 
     @DataProvider
     public static Object[][] creditCardRequests(){
-        validRequest.setCardNumber("4012888888881881");
-        emptyRequest.setCardNumber("");
-        outOfBoundRequest.setCardNumber("4012888888881881123456789109873");
-        invalidCardRequest.setCardNumber("1111233333333");
+        validRequest.setEncryptedCardNumber("4012888888881881");
+        emptyRequest.setEncryptedCardNumber("");
+        outOfBoundRequest.setEncryptedCardNumber("4012888888881881123456789109873");
+        invalidCardRequest.setEncryptedCardNumber("1111233333333");
 
         return new Object[][]{
                 {validRequest, HttpStatus.CREATED},

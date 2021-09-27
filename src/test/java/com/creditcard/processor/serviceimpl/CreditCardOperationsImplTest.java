@@ -43,21 +43,21 @@ public class CreditCardOperationsImplTest {
     @Before
     public void setup(){
         MockitoAnnotations.openMocks(this);
-        validRequest.setCardNumber("4012888888881881");
-        emptyRequest.setCardNumber("");
-        outOfBoundRequest.setCardNumber("4012888888881881123456789109873");
-        invalidCardRequest.setCardNumber("1111233333333");
-        charactersRequest.setCardNumber("1973jdmsk097");
-        when(validations.isLengthValid(validRequest.getCardNumber())).thenReturn(true);
-        when(validations.areCharactersVaild(validRequest.getCardNumber())).thenReturn(true);
-        when(validations.isLuhnVaild(validRequest.getCardNumber())).thenReturn(true);
-        when(validations.isLengthValid(emptyRequest.getCardNumber())).thenReturn(false);
-        when(validations.isLengthValid(outOfBoundRequest.getCardNumber())).thenReturn(false);
-        when(validations.isLengthValid(invalidCardRequest.getCardNumber())).thenReturn(true);
-        when(validations.areCharactersVaild(invalidCardRequest.getCardNumber())).thenReturn(true);
-        when(validations.isLuhnVaild(invalidCardRequest.getCardNumber())).thenReturn(false);
-        when(validations.isLengthValid(charactersRequest.getCardNumber())).thenReturn(true);
-        when(validations.areCharactersVaild(charactersRequest.getCardNumber())).thenReturn(false);
+        validRequest.setEncryptedCardNumber("JnAMaEFVbFT+Cm1iALJ8OiXTiho6jIWNckM9Uh2yzVo=");
+        emptyRequest.setEncryptedCardNumber("");
+        outOfBoundRequest.setEncryptedCardNumber("4012888888881881123456789109873");
+        invalidCardRequest.setEncryptedCardNumber("1111233333333");
+        charactersRequest.setEncryptedCardNumber("1973jdmsk097");
+        when(validations.isLengthValid(validRequest.getEncryptedCardNumber())).thenReturn(true);
+        when(validations.areCharactersVaild(validRequest.getEncryptedCardNumber())).thenReturn(true);
+        when(validations.isLuhnVaild(validRequest.getEncryptedCardNumber())).thenReturn(true);
+        when(validations.isLengthValid(emptyRequest.getEncryptedCardNumber())).thenReturn(false);
+        when(validations.isLengthValid(outOfBoundRequest.getEncryptedCardNumber())).thenReturn(false);
+        when(validations.isLengthValid(invalidCardRequest.getEncryptedCardNumber())).thenReturn(true);
+        when(validations.areCharactersVaild(invalidCardRequest.getEncryptedCardNumber())).thenReturn(true);
+        when(validations.isLuhnVaild(invalidCardRequest.getEncryptedCardNumber())).thenReturn(false);
+        when(validations.isLengthValid(charactersRequest.getEncryptedCardNumber())).thenReturn(true);
+        when(validations.areCharactersVaild(charactersRequest.getEncryptedCardNumber())).thenReturn(false);
     }
 
     @DataProvider
@@ -88,7 +88,7 @@ public class CreditCardOperationsImplTest {
     @Test
     public void test_getCreditCard_whenDataIsPresent(){
         CreditCardAccount account = new CreditCardAccount();
-        account.setCardNumber("4012888888881881");
+        account.setCardNumber("JnAMaEFVbFT+Cm1iALJ8OiXTiho6jIWNckM9Uh2yzVo=");
         account.setBalance(100L);
         when(repo.findAll()).thenReturn(new ArrayList<>());
         ResponseEntity responseEntity = operations.getCreditCard();

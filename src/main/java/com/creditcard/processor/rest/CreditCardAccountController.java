@@ -1,8 +1,6 @@
 package com.creditcard.processor.rest;
 
-import com.creditcard.processor.domain.CreateCardRequest;
-import com.creditcard.processor.domain.CreateCardResponse;
-import com.creditcard.processor.domain.CardResponse;
+import com.creditcard.processor.domain.*;
 import com.creditcard.processor.service.CreditCardOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,5 +25,9 @@ public class CreditCardAccountController {
         return creditCardOperations.getCreditCard();
     }
 
+    @GetMapping(value = "accounts/credit-card/encrypt-helper")
+    public ResponseEntity<EncryptResponse> getEncryptedCreditCard(@RequestBody EncryptRequest request){
+        return creditCardOperations.getEncryptedCardNumber(request);
+    }
 
 }
