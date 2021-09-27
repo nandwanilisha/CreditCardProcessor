@@ -10,6 +10,7 @@ This is a Spring Boot Application developed in JAVA, is used to add credt-card a
                "balance" : Z  
             }    
             where X is a number from 0-9, Z is the amount for initial balance.  
+            Balance is optional as intial balance can be 0 at the begining.
             
    Produces: JSON  
              {   
