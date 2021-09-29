@@ -19,20 +19,20 @@ public class CreditCardValidationsImplTest {
     CreditCardValidationsImpl validations;
 
 
-    static CreateCardRequest validRequest = new CreateCardRequest();
-    static CreateCardRequest emptyRequest = new CreateCardRequest();
-    static CreateCardRequest outOfBoundRequest = new CreateCardRequest();
-    static CreateCardRequest invalidCardRequest = new CreateCardRequest();
-    static CreateCardRequest charactersRequest = new CreateCardRequest();
+    static final CreateCardRequest validRequest = new CreateCardRequest();
+    static final CreateCardRequest emptyRequest = new CreateCardRequest();
+    static final CreateCardRequest outOfBoundRequest = new CreateCardRequest();
+    static final CreateCardRequest invalidCardRequest = new CreateCardRequest();
+    static final CreateCardRequest charactersRequest = new CreateCardRequest();
 
     @Before
     public void setup(){
         MockitoAnnotations.openMocks(this);
-        validRequest.setEncryptedCardNumber("4012888888881881");
-        emptyRequest.setEncryptedCardNumber("");
-        outOfBoundRequest.setEncryptedCardNumber("4012888888881881123456789109873");
-        invalidCardRequest.setEncryptedCardNumber("1111233333333");
-        charactersRequest.setEncryptedCardNumber("1973jdmsk097");
+        validRequest.setCardNumber("4012888888881881");
+        emptyRequest.setCardNumber("");
+        outOfBoundRequest.setCardNumber("4012888888881881123456789109873");
+        invalidCardRequest.setCardNumber("1111233333333");
+        charactersRequest.setCardNumber("1973jdmsk097");
     }
 
     @DataProvider
@@ -71,21 +71,21 @@ public class CreditCardValidationsImplTest {
     @Test
     @UseDataProvider("validLengthRequests")
     public void test_validateLength(CreateCardRequest request, boolean expectedStatus){
-        boolean result  = validations.isLengthValid(request.getEncryptedCardNumber());
+        boolean result  = validations.isLengthValid(request.getCardNumber());
         assertEquals(expectedStatus, result);
     }
 
     @Test
     @UseDataProvider("validCharactersRequests")
     public void test_validateCharacters(CreateCardRequest request, boolean expectedStatus){
-        boolean result  = validations.areCharactersVaild(request.getEncryptedCardNumber());
+        boolean result  = validations.areCharactersVaild(request.getCardNumber());
         assertEquals(expectedStatus, result);
     }
 
     @Test
     @UseDataProvider("validLuhnRequests")
     public void test_validateLuhn(CreateCardRequest request, boolean expectedStatus){
-        boolean result  = validations.isLuhnVaild(request.getEncryptedCardNumber());
+        boolean result  = validations.isLuhnVaild(request.getCardNumber());
         assertEquals(expectedStatus, result);
     }
 

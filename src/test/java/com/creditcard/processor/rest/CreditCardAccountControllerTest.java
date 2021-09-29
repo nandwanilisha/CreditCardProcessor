@@ -1,7 +1,7 @@
 package com.creditcard.processor.rest;
 
 import com.creditcard.processor.domain.CreateCardRequest;
-import com.creditcard.processor.domain.CreateCardResponse;
+import com.creditcard.processor.exception.InvalidRequestException;
 import com.creditcard.processor.service.CreditCardOperations;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
@@ -12,12 +12,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.*;
 
 @RunWith(DataProviderRunner.class)
 public class CreditCardAccountControllerTest {
@@ -28,41 +27,56 @@ public class CreditCardAccountControllerTest {
     @Mock
     CreditCardOperations operations;
 
-    static CreateCardRequest validRequest = new CreateCardRequest();
-    static CreateCardRequest emptyRequest = new CreateCardRequest();
-    static CreateCardRequest outOfBoundRequest = new CreateCardRequest();
-    static CreateCardRequest invalidCardRequest = new CreateCardRequest();
+    static final CreateCardRequest validRequest = new CreateCardRequest();
+    static final CreateCardRequest emptyRequest = new CreateCardRequest();
+    static final CreateCardRequest noLimit = new CreateCardRequest();
+    static final CreateCardRequest noName = new CreateCardRequest();
+    static final CreateCardRequest noCard = new CreateCardRequest();
 
     @Before
     public void setup(){
         MockitoAnnotations.openMocks(this);
-        when(operations.saveCreditCard(validRequest)).thenReturn(ResponseEntity.status(HttpStatus.CREATED).body(new CreateCardResponse()));
-        when(operations.saveCreditCard(emptyRequest)).thenReturn(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse()));
-        when(operations.saveCreditCard(outOfBoundRequest)).thenReturn(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse()));
-        when(operations.saveCreditCard(invalidCardRequest)).thenReturn(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse()));
     }
 
     @DataProvider
     public static Object[][] creditCardRequests(){
-        validRequest.setEncryptedCardNumber("4012888888881881");
-        emptyRequest.setEncryptedCardNumber("");
-        outOfBoundRequest.setEncryptedCardNumber("4012888888881881123456789109873");
-        invalidCardRequest.setEncryptedCardNumber("1111233333333");
+        validRequest.setCardNumber("4012888888881881");
+        validRequest.setName("Lisha");
+        validRequest.setLimit(10000L);
+        noLimit.setCardNumber("4012888888881881");
+        noLimit.setName("Lisha");
+        noName.setCardNumber("1111233333333");
+        noName.setLimit(1000L);
+        noCard.setLimit(1000L);
+        noCard.setName("lisha");
 
         return new Object[][]{
-                {validRequest, HttpStatus.CREATED},
-                {emptyRequest, HttpStatus.BAD_REQUEST},
-                {outOfBoundRequest, HttpStatus.BAD_REQUEST},
-                {invalidCardRequest, HttpStatus.BAD_REQUEST}
+                {emptyRequest, InvalidRequestException.class},
+                {noLimit, InvalidRequestException.class},
+                {noName, InvalidRequestException.class},
+                {noCard, InvalidRequestException.class}
+
         };
     }
 
     @Test
     @UseDataProvider("creditCardRequests")
-    public void test_creditCard_Create(CreateCardRequest request, HttpStatus expectedStatus){
-        ResponseEntity responseEntity = controller.createAccount(request);
-        assertEquals(expectedStatus, responseEntity.getStatusCode());
-        verify(operations).saveCreditCard(request);
+    public void test_creditCard_CreateInvalid(CreateCardRequest request, Class classExpected){
+        boolean check = false;
+        try{
+            ResponseEntity responseEntity = controller.createAccount(request);
+        }catch(RuntimeException re){
+            assertEquals(classExpected, re.getClass());
+            check = true;
+        }
+        verifyNoInteractions(operations);
+        assertTrue(check);
+    }
+
+    @Test
+    public void test_creditCard_valid(){
+        ResponseEntity responseEntity = controller.createAccount(validRequest);
+        verify(operations).saveCreditCard(validRequest);
     }
 
     @Test

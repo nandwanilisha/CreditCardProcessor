@@ -25,7 +25,7 @@ public class CreditCardValidationsImpl implements CreditCardValidations {
         int sum = 0;
         boolean secondDigit = false;
         for (int i = cardNumber.length()-1 ; i >= 0; i--) {
-            int digit = Integer.valueOf(cardNumber.charAt(i))-48;
+            int digit = (int) cardNumber.charAt(i) -48;
             if(secondDigit){
                 digit *= 2;
                 sum += digit % 10 + digit / 10;

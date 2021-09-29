@@ -2,20 +2,20 @@ package com.creditcard.processor.serviceimpl;
 
 import com.creditcard.processor.domain.*;
 import com.creditcard.processor.entity.CreditCardAccount;
+import com.creditcard.processor.exception.EncryptionFailedException;
+import com.creditcard.processor.exception.InvalidCardNumberException;
+import com.creditcard.processor.exception.InvalidLengthException;
+import com.creditcard.processor.exception.LuhnValidationFailedException;
 import com.creditcard.processor.repo.CreditCardAccountRepo;
 import com.creditcard.processor.service.CreditCardOperations;
 import com.creditcard.processor.service.CreditCardValidations;
 import com.creditcard.processor.service.EncryptionDecryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CreditCardOperationsImpl implements CreditCardOperations {
@@ -30,58 +30,52 @@ public class CreditCardOperationsImpl implements CreditCardOperations {
     EncryptionDecryptionService encryptionDecryptionService;
 
     @Override
-    public ResponseEntity<CreateCardResponse> saveCreditCard(CreateCardRequest cardDetails) {
-        String decryptedCard = encryptionDecryptionService.decrypt(cardDetails.getEncryptedCardNumber());
-        if(!StringUtils.hasLength(decryptedCard) && !validations.isLengthValid(decryptedCard)){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse("Length of the card number is not valid"));
+    public void saveCreditCard(CreateCardRequest cardDetails) {
+        String decryptedCard = encryptionDecryptionService.decrypt(cardDetails.getCardNumber());
+        if(!StringUtils.hasLength(decryptedCard) || !validations.isLengthValid(decryptedCard)){
+            throw new InvalidLengthException("Length of the card number is not valid");
         }
         if(!validations.areCharactersVaild(decryptedCard)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse("Card Number must contain numeric numbers only"));
+            throw new InvalidCardNumberException("Card Number must contain numeric numbers only");
         }
         if(!validations.isLuhnVaild(decryptedCard)){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse("Card Number is not valid."));
+            throw new LuhnValidationFailedException("Card Number is not valid.");
         }
 
         CreditCardAccount account = new CreditCardAccount();
+        account.setName(cardDetails.getName());
         account.setCardNumber(encryptionDecryptionService.encrypt(decryptedCard));
-        account.setBalance(cardDetails.getBalance() != null && cardDetails.getBalance() >= 0
-                ? cardDetails.getBalance() : 0);
+        account.setBalance(0L);
+        account.setLimit(cardDetails.getLimit());
 
         if(!StringUtils.hasLength(account.getCardNumber())){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CreateCardResponse("Encryption Failed."));
+            throw new EncryptionFailedException("Encryption Failed.");
         }
 
-        try{
-            repo.save(account);
-        }catch (DataIntegrityViolationException ex){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse("Card Number is already in use."));
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(new CreateCardResponse("Successfully created."));
+        repo.save(account);
     }
 
     @Override
-    public ResponseEntity<List<CardResponse>> getCreditCard() {
+    public List<CardResponse> getCreditCard() {
         Iterable<CreditCardAccount> items = repo.findAll();
 
         List<CardResponse> cards = new ArrayList<>();
-        if(Optional.ofNullable(items).isPresent()){
-            items.forEach(item ->
-            {
-                String cardNumber = encryptionDecryptionService.decrypt(item.getCardNumber());
-                if (StringUtils.hasLength(cardNumber)) {
-                    cards.add(new CardResponse(cardNumber, item.getBalance()));
-                }
-            });
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(cards);
+        items.forEach(item ->
+        {
+            String cardNumber = encryptionDecryptionService.decrypt(item.getCardNumber());
+            if (StringUtils.hasLength(cardNumber)) {
+                cards.add(new CardResponse(item.getName(), cardNumber, item.getBalance(), item.getLimit()));
+            }
+        });
+        return cards;
     }
 
     @Override
-    public ResponseEntity<EncryptResponse> getEncryptedCardNumber(EncryptRequest request) {
+    public String getEncryptedCardNumber(EncryptRequest request) {
         String encryptedCardNumber = encryptionDecryptionService.encrypt(request.getCardNumber());
         if(StringUtils.hasLength(encryptedCardNumber)){
-            return ResponseEntity.status(HttpStatus.OK).body(new EncryptResponse(encryptedCardNumber));
+            return encryptedCardNumber;
         }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new EncryptResponse());
+        return null;
     }
 }

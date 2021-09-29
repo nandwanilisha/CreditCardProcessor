@@ -12,6 +12,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CardResponse implements Serializable {
+    private String name;
     private String cardNumber;
     private Long balance;
+    private Long limit;
 }

@@ -16,9 +16,15 @@ public class CreditCardAccount implements Serializable {
     @Column(name = "ID", unique = true)
     private Long id;
 
+    @Column(name = "NAME")
+    private String name;
+
     @Column(name = "CARD_NUMBER", unique = true)
     private String cardNumber;
 
     @Column(name = "BALANCE")
     private Long balance;
+
+    @Column(name = "LIMIT_AMOUNT")
+    private Long limit;
 }
