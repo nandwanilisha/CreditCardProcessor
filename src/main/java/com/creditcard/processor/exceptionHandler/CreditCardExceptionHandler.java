@@ -12,22 +12,22 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class CreditCardExceptionHandler {
 
     @ExceptionHandler(value = {InvalidLengthException.class})
-    public ResponseEntity<Object> handleInvalidLengthException(RuntimeException ex){
+    public ResponseEntity<Object> handleInvalidLengthException(InvalidLengthException ex){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse("Length of credit card number is invalid."));
     }
 
     @ExceptionHandler(value = {InvalidCardNumberException.class})
-    public ResponseEntity<Object> handleInvalidCardNumberException(RuntimeException ex){
+    public ResponseEntity<Object> handleInvalidCardNumberException(InvalidCardNumberException ex){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse("Characters of credit card number is invalid."));
     }
 
     @ExceptionHandler(value = {LuhnValidationFailedException.class})
-    public ResponseEntity<Object> handleLuhnException(RuntimeException ex){
+    public ResponseEntity<Object> handleLuhnException(LuhnValidationFailedException ex){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse("Credit card number is invalid."));
     }
 
     @ExceptionHandler(value = {InvalidRequestException.class})
-    public ResponseEntity<Object> handleInvalidRequestException(RuntimeException ex){
+    public ResponseEntity<Object> handleInvalidRequestException(InvalidRequestException ex){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CreateCardResponse("Invalid card request"));
     }
 
